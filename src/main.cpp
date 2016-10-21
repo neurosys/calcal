@@ -82,7 +82,7 @@ namespace calcal
 
     Date::Date()
     {
-        unix_now = std::time(nullptr);
+        unix_now = std::time(NULL);
         ::localtime_r(&unix_now, &now);
         //std::cout << "Date()" << std::endl;
     }
