@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <string>
+#include <cstring>
 #include <vector>
 
 namespace calcal
@@ -36,19 +37,24 @@ namespace calcal
         public:
             Date();
             Date(int utime);
-            //operator ++(); // Increase day by one
-            //operator ++(int); // Increase day by one
-            //operator +(int); // Add days
-            //operator +=(int); // Add days
-            //operator -=(int); // Add days
+            Date(int y, int m, int d);
+            Date& operator --(); // Decrease day by one
+            Date& operator --(int); // Substract days
+            Date& operator ++(); // Increase day by one
+            Date& operator ++(int); // Add days
+            Date& operator +=(int); // Add days
+            Date& operator -=(int); // Substract days (get past dates)
+            Date  operator +(int); 
+            Date  operator -(int);
 
         public:
-            int GetYear();
-            int GetMonth();
-            int GetDayOfMonth();
-            int GetDayOfWeek();
-            std::string GetStrDayOfWeek();
-            std::string GetStrMonth();
+            int GetYear() const;
+            int GetMonth() const;
+            int GetDayOfMonth() const;
+            int GetDayOfWeek() const;
+            std::string GetStrDayOfWeek() const;
+            std::string GetStrMonth() const;
+            void PrintISO() const;
 
         private:
             std::time_t unix_now;
@@ -58,7 +64,7 @@ namespace calcal
     };
 
     const std::string Date::MonthNames[] = { "None"
-        "January",
+            "January",
             "February",
             "March",
             "April",
@@ -72,7 +78,7 @@ namespace calcal
             "December" };
 
     const std::string Date::DayNames[] = { "None"
-        "Monday",
+            "Monday",
             "Tuesday",
             "Wensday",
             "Thirstday",
@@ -93,34 +99,120 @@ namespace calcal
         ::localtime_r(&unix_now, &now);
     }
 
-    int Date::GetMonth()
+    Date::Date(int y, int m, int d)
+    {
+        std::memset(&now, 0, sizeof(std::tm));
+        now.tm_year = y;
+        now.tm_mon = m;
+        now.tm_mday = d;
+        unix_now = mktime(&now);
+    }
+
+    int Date::GetMonth() const
     {
         return now.tm_mon + 1;
     }
 
-    std::string Date::GetStrMonth()
+    std::string Date::GetStrMonth() const
     {
         return MonthNames[GetMonth()];
     }
 
-    int Date::GetYear()
+    int Date::GetYear() const
     {
         return now.tm_year + 1900;
     }
 
-    int Date::GetDayOfMonth()
+    int Date::GetDayOfMonth() const
     {
         return now.tm_mday;
     }
 
-    int Date::GetDayOfWeek()
+    int Date::GetDayOfWeek() const
     {
         return now.tm_wday + 1;
     }
 
-    std::string Date::GetStrDayOfWeek()
+    std::string Date::GetStrDayOfWeek() const
     {
         return DayNames[GetDayOfWeek()];
+    }
+
+    Date& Date::operator +=(int x)
+    {
+        unix_now += 60 * 60 * 24 * x;
+        ::localtime_r(&unix_now, &now);
+        return *this;
+    }
+
+    Date& Date::operator -=(int x)
+    {
+        unix_now -= 60 * 60 * 24 * x;
+        ::localtime_r(&unix_now, &now);
+        return *this;
+    }
+
+    Date& Date::operator --(int)
+    {
+        *this -= 1;
+        return *this;
+    }
+
+    Date& Date::operator --()
+    {
+        *this -= 1;
+        return *this;
+    }
+
+    Date& Date::operator ++(int)
+    {
+        *this += 1;
+        return *this;
+    }
+
+    Date& Date::operator ++()
+    {
+        *this += 1;
+        return *this;
+    }
+
+    Date Date::operator +(int x)
+    {
+        Date d = *this;
+        d += x;
+        return d;
+    }
+
+    Date Date::operator -(int x)
+    {
+        Date d = *this;
+        d -= x;
+        return d;
+    }
+
+    Date operator+(int x, Date& y)
+    {
+        Date d = y + x;
+        return d;
+    }
+
+    Date operator-(int x, Date& y)
+    {
+        Date d = y - x;
+        return d;
+    }
+
+    std::ostream& operator <<(std::ostream& out, Date const& d)
+    {
+        return out << d.GetYear()  << "-"
+                   << d.GetMonth() << "-"
+                   << d.GetDayOfMonth() ;
+    }
+
+    // YYYY-MM-DD
+    void Date::PrintISO() const
+    {
+        std::cout << *this << std::endl;
     }
 }
 
@@ -132,8 +224,35 @@ int main(int argc, char* argv[])
         std::cout << "argv[" << i << "] = '" << argv[i] << "'" << std::endl;
     }
     calcal::Date c;
-    std::cout << c.GetYear() << "-"
-              << c.GetMonth() << "-"
-              << c.GetDayOfMonth() << std::endl;
+    std::cout << "Azi " ;
+    c.PrintISO();
+
+    /*
+    std::cout << "Ieri = " ;
+    c -= 1;
+    c.PrintISO();
+
+    std::cout << "Acum doua zile = " ;
+    c -= 1;
+    c.PrintISO();
+
+    std::cout << "Acum 10 zile = " ;
+    c -= 8;
+    c.PrintISO();
+    */
+    c -= 10;
+    std::cout << "Acum 10 zile = " << c << std::endl;
+    c.PrintISO();
+
+    /*
+    for (int i = 0; i < 10; i++)
+    {
+        std::cout << "i = " << i + 1<< " ";
+        c++;
+        c.PrintISO();
+    }
+    */
+
+
     return 0;
 }
