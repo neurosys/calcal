@@ -31,6 +31,10 @@ namespace calcal
 
 */
 
+#define SECONDS_IN_A_DAY (60 * 60 * 24)
+#define MINUTES_IN_A_DAY (60 * 24)
+#define HOURS_IN_A_DAY   (24)
+
 
     class Date
     {
@@ -46,6 +50,7 @@ namespace calcal
             Date& operator -=(int); // Substract days (get past dates)
             Date  operator +(int); 
             Date  operator -(int);
+            int   operator -(Date&);
 
         public:
             int GetYear() const;
@@ -140,14 +145,14 @@ namespace calcal
 
     Date& Date::operator +=(int x)
     {
-        unix_now += 60 * 60 * 24 * x;
+        unix_now += SECONDS_IN_A_DAY * x;
         ::localtime_r(&unix_now, &now);
         return *this;
     }
 
     Date& Date::operator -=(int x)
     {
-        unix_now -= 60 * 60 * 24 * x;
+        unix_now -= SECONDS_IN_A_DAY * x;
         ::localtime_r(&unix_now, &now);
         return *this;
     }
@@ -190,6 +195,12 @@ namespace calcal
         return d;
     }
 
+    int Date::operator -(Date& x)
+    {
+        int delta = unix_now - x.unix_now;
+        return (delta / SECONDS_IN_A_DAY);
+    }
+
     Date operator+(int x, Date& y)
     {
         Date d = y + x;
@@ -224,6 +235,7 @@ int main(int argc, char* argv[])
         std::cout << "argv[" << i << "] = '" << argv[i] << "'" << std::endl;
     }
     calcal::Date c;
+    calcal::Date b;
     std::cout << "Azi " ;
     c.PrintISO();
 
@@ -243,6 +255,8 @@ int main(int argc, char* argv[])
     c -= 10;
     std::cout << "Acum 10 zile = " << c << std::endl;
     c.PrintISO();
+
+    std::cout << "Azi din nou = " << b - c << std::endl;
 
     /*
     for (int i = 0; i < 10; i++)
